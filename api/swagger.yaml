@@ -1,0 +1,520 @@
+openapi: 3.0.1
+info:
+  title: Chequebase AI Endpoint Documentation
+  description: AWS API Gateway for AI-powered app features.
+  version: "1"
+servers:
+- url: https://virtserver.swaggerhub.com/DIVINEOD9/chequebase-analytics-ai/1
+  description: SwaggerHub API Auto Mocking
+- url: https://84vtt8xp3f.execute-api.eu-central-1.amazonaws.com/development
+tags:
+- name: expense reporting
+  description: APIs related to AI- powered expense report management.
+- name: analytics
+  description: APIs related to Analytics dashboards.
+paths:
+  /chequebase-ai-getExpenseReport:
+    put:
+      tags:
+      - expense reporting
+      summary: Get expense report
+      description: Retrieve expense reports for a specific company within a specified
+        date range. This operation requires AWS IAM authentication and Signature v4.
+      operationId: getExpenseReport
+      parameters:
+      - name: company_id
+        in: query
+        description: The ID of the company for which the expense report is requested.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: start_date
+        in: query
+        description: The start date for filtering the expense report.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: The end date for filtering the expense report.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "Bearer token for IAM authentication, passed using Signature\
+          \ v4."
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully retrieved expense report.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empty'
+      security:
+      - IAMAuth: []
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-ai-get-expense-report/invocations
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+        type: aws_proxy
+  /chequebase-ai-uploadToS3:
+    post:
+      tags:
+      - expense reporting
+      summary: Upload files to S3
+      description: Get pre-signed URLs for uploading files to S3. This operation requires
+        AWS IAM authentication and Signature v4.
+      operationId: uploadToS3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/chequebaseaiuploadToS3_body'
+        required: true
+      responses:
+        "200":
+          description: Successfully retrieved pre-signed URLs for file upload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empty'
+      security:
+      - IAMAuth: []
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-ai-get-presigned-url/invocations
+        requestTemplates:
+          application/json: |
+            {
+              "company_id": "$input.path('$.company_id')",
+              "filenames": "$input.path('$.filenames')"
+            }
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+        type: aws_proxy
+  /chequebase-analytics-elasticsearch-search/inflow:
+    get:
+      tags:
+      - analytics
+      summary: Perform inflow search in Elasticsearch
+      description: "Retrieve inflow data by performing a search query on the Elasticsearch\
+        \ index with filters on organization, start date, and end date."
+      operationId: searchInflow
+      parameters:
+      - name: organization
+        in: query
+        description: The organization ID for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: start_date
+        in: query
+        description: The start date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: The end date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Authorization token for the request.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully performed inflow search.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-analytics-inflow/invocations
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+  /chequebase-analytics-elasticsearch-search/outflow:
+    get:
+      tags:
+      - analytics
+      summary: Perform outflow search in Elasticsearch
+      description: "Retrieve outflow data by performing a search query on the Elasticsearch\
+        \ index with filters on organization, start date, and end date."
+      operationId: searchOutflow
+      parameters:
+      - name: organization
+        in: query
+        description: The organization ID for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: start_date
+        in: query
+        description: The start date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: The end date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Authorization token for the request.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully performed outflow search.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-analytics-outflow/invocations
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+  /chequebase-analytics-elasticsearch-search/budget:
+    get:
+      tags:
+      - analytics
+      summary: Perform budget search in Elasticsearch
+      description: "Retrieve budget data by performing a search query on the Elasticsearch\
+        \ index with filters on organization, start date, and end date."
+      operationId: searchBudget
+      parameters:
+      - name: organization
+        in: query
+        description: The organization ID for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: start_date
+        in: query
+        description: The start date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: The end date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Authorization token for the request.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully performed outflow search.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-analytics-budget/invocations
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+  /chequebase-analytics-elasticsearch-search/categories:
+    get:
+      tags:
+      - analytics
+      summary: Perform categories search in Elasticsearch
+      description: "Retrieve categories data by performing a search query on the Elasticsearch\
+        \ index with filters on organization, start date, and end date."
+      operationId: searchCategories
+      parameters:
+      - name: organization
+        in: query
+        description: The organization ID for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: start_date
+        in: query
+        description: The start date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: The end date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Authorization token for the request.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully performed outflow search.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-analytics-categories/invocations
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+  /chequebase-analytics-elasticsearch-search/departments:
+    get:
+      tags:
+      - analytics
+      summary: Perform departments search in Elasticsearch
+      description: "Retrieve departments data by performing a search query on the\
+        \ Elasticsearch index with filters on organization, start date, and end date."
+      operationId: searchDepartments
+      parameters:
+      - name: organization
+        in: query
+        description: The organization ID for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: start_date
+        in: query
+        description: The start date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: The end date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Authorization token for the request.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully performed outflow search.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-analytics-departments/invocations
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+  /chequebase-analytics-elasticsearch-search/users:
+    get:
+      tags:
+      - analytics
+      summary: Perform search for top 10 spenders in Elasticsearch
+      description: "Retrieve top 10 spenders data by performing a search query on\
+        \ the Elasticsearch index with filters on organization, start date, and end\
+        \ date."
+      operationId: searchUsers
+      parameters:
+      - name: organization
+        in: query
+        description: The organization ID for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: start_date
+        in: query
+        description: The start date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: The end date for the search query.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Authorization token for the request.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully performed outflow search.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-analytics-users/invocations
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+  /chequebase-ai-userAuthentication:
+    get:
+      tags:
+      - analytics
+      summary: Authenticate user
+      description: This endpoint is used for authenticating a user based on their
+        organization and credentials.
+      operationId: userAuthentication
+      parameters:
+      - name: organization
+        in: query
+        description: The ID of the organization to authenticate the user for.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: client-id
+        in: header
+        description: Client ID for authenticating the request.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "Authorization token, typically provided via AWS Signature V4."
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully authenticated the user.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+      security:
+      - IAMAuth: []
+      x-amazon-apigateway-integration:
+        credentials: arn:aws:iam::381491983037:role/service-role/fetchExpenseReport-role-lod7mzer
+        httpMethod: POST
+        uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:381491983037:function:chequebase-ai-user-authentication/invocations
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 29000
+        contentHandling: CONVERT_TO_TEXT
+        type: aws_proxy
+components:
+  schemas:
+    Empty:
+      title: Empty Schema
+      type: object
+    chequebaseaiuploadToS3_body:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: The ID of the company under which the files are being uploaded.
+        filenames:
+          type: string
+          description: A comma-separated string of file names to upload.
+  securitySchemes:
+    IAMAuth:
+      type: apiKey
+      description: Use AWS Signature v4 with IAM credentials for authentication. You
+        can generate the signature using AWS SDK or AWS CLI.
+      name: Authorization
+      in: header
